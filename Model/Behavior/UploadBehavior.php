@@ -829,6 +829,35 @@ class UploadBehavior extends ModelBehavior {
 		list($imgWidth, $imgHeight) = getimagesize($check[$field]['tmp_name']);
 		return $width > 0 && $imgWidth <= $width;
 	}
+	
+/**
+ * Check that the file has an image mimetype
+ *
+ * @param Object $model
+ * @param mixed $check Value to check
+ * @param int $width Width of Image
+ * @return boolean Success
+ * @access public
+ */
+	public function isValidImage(&$model, $check, $requireUpload = true) {
+		$field = array_pop(array_keys($check));
+
+		if (!empty($check[$field]['remove'])) {
+			return true;
+		}
+
+		// Allow circumvention of this rule if uploads is not required
+		if (!$requireUpload && $check[$field]['error'] === UPLOAD_ERR_NO_FILE) {
+			return true;
+		}
+
+		// Non-file uploads also mean the it's not an image
+		if (!isset($check[$field]['type']) || !strlen($check[$field]['type'])) {
+			return false;
+		}
+		
+		return $this->_isImage($model, $check[$field]['type']);
+	}
 
 	public function _resizeImagick(&$model, $field, $path, $size, $geometry, $thumbnailPath) {
 		$srcFile  = $path . $model->data[$model->alias][$field];

@@ -659,6 +659,26 @@ If the argument `$requireUpload` is passed, we can skip this check when a file i
 		)
 	);
 
+#### isValidImage
+
+Check that the file is of a valid image (based on their mimetype)
+
+	public $validate = array(
+		'photo' => array(
+			'rule' => array('isValidImage'),
+			'message' => 'File is of an invalid image'
+		)
+	);
+
+If the argument `$requireUpload` is passed, we can skip this check when a file is not uploaded:
+
+	public $validate = array(
+		'photo' => array(
+			'rule' => array('isValidImage', false),
+			'message' => 'File is of an invalid image'
+		)
+	);
+
 ## License
 
 Copyright (c) 2010-2012 Jose Diaz-Gonzalez
