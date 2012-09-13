@@ -1209,7 +1209,14 @@ class UploadBehavior extends ModelBehavior {
 	public function _prepareFilesForDeletion(&$model, $field, $data, $options) {
 		if (!strlen($data[$model->alias][$field])) return $this->__filesToRemove;
 
-		$dir = $this->_getPath($model, $field);
+		// get directory from fields if available
+		if (isset($data[$model->alias][$options['fields']['dir']])) {
+			$dir = $data[$model->alias][$options['fields']['dir']];
+		}
+		// get directory from _getPath
+		else {
+			$dir = $this->_getPath($model, $field);
+		}
 		$filePathDir = $this->settings[$model->alias][$field]['path'] . $dir . DS;
 		$filePath = $filePathDir.$data[$model->alias][$field];
 		$pathInfo = $this->_pathinfo($filePath);
