@@ -331,6 +331,19 @@ class UploadBehavior extends ModelBehavior {
 				$result[] = $this->unlink($file);
 			}
 		}
+		
+		// if path method defined as primary key (in other word unique directory),
+		// delete the directory after all images in it has been deleted
+		foreach ($this->settings[$model->alias] as $field => $options) {
+			if ($options['pathMethod'] == '_getPathPrimaryKey') {
+				$path = $this->settings[$model->alias][$field]['path'];
+				$path .= $this->_getPath($model, $field);
+				$files = @scandir($path);
+				if (count($files) <= 2) {
+					rmdir($path);
+				}
+			}
+		}
 		return $result;
 	}
 
@@ -1196,7 +1209,7 @@ class UploadBehavior extends ModelBehavior {
 	public function _prepareFilesForDeletion(&$model, $field, $data, $options) {
 		if (!strlen($data[$model->alias][$field])) return $this->__filesToRemove;
 
-		$dir = $data[$model->alias][$options['fields']['dir']];
+		$dir = $this->_getPath($model, $field);
 		$filePathDir = $this->settings[$model->alias][$field]['path'] . $dir . DS;
 		$filePath = $filePathDir.$data[$model->alias][$field];
 		$pathInfo = $this->_pathinfo($filePath);
