@@ -260,6 +260,12 @@ class UploadBehavior extends ModelBehavior {
 	}
 
 	public function afterSave(Model $model, $created) {
+		
+		// delete old files first
+		foreach ($this->__filesToRemove[$model->alias] as $file) {
+			$result[] = $this->unlink($file);
+		}
+		
 		$temp = array($model->alias => array());
 		foreach ($this->settings[$model->alias] as $field => $options) {
 			if (!in_array($field, array_keys($model->data[$model->alias]))) continue;
@@ -296,11 +302,7 @@ class UploadBehavior extends ModelBehavior {
 			));
 		}
 
-		if (empty($this->__filesToRemove[$model->alias])) return true;
-		foreach ($this->__filesToRemove[$model->alias] as $file) {
-			$result[] = $this->unlink($file);
-		}
-		return $result;
+		return true;
 	}
 
 	public function handleUploadedFile($modelAlias, $field, $tmp, $filePath) {
