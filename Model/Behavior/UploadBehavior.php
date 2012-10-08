@@ -261,9 +261,11 @@ class UploadBehavior extends ModelBehavior {
 
 	public function afterSave(Model $model, $created) {
 		
-		// delete old files first
-		foreach ($this->__filesToRemove[$model->alias] as $file) {
-			$result[] = $this->unlink($file);
+		// delete old files first (if available)
+		if (isset($this->__filesToRemove[$model->alias]) && !empty($this->__filesToRemove[$model->alias])) {
+			foreach ($this->__filesToRemove[$model->alias] as $file) {
+				$result[] = $this->unlink($file);
+			}
 		}
 		
 		$temp = array($model->alias => array());
