@@ -1045,6 +1045,22 @@ class UploadBehavior extends ModelBehavior {
 				if ($srcW > $srcH) $destW = (int)$geometry-1;
 				else $destH = (int)$geometry-1;
 				$resizeMode = false;
+			} elseif (preg_match('/^\\[[\\d]+x[\\d]+\\]+l$/', $geometry)) {
+				// calculate shortest side according to aspect ratio for geometry aspect ratio
+				list($destW, $destH) = explode('x', substr($geometry, 1, strlen($geometry)-3));
+				$aspectW = $srcW / $destW;
+				$aspectH = $srcH / $destH;
+				// if width aspect is greater than height
+				if ($aspectW > $aspectH) {
+					$destW = floor($srcW / $aspectW);
+					$destH = floor($srcH / $aspectW);
+				}
+				// else height aspect is greater than width or aspects are the same
+				else {
+					$destW = floor($srcW / $aspectH);
+					$destH = floor($srcH / $aspectH);
+				}
+				$resizeMode = false;
 			}
 			if (!isset($destW)) $destW = ($destH/$srcH) * $srcW;
 			if (!isset($destH)) $destH = ($destW/$srcW) * $srcH;
