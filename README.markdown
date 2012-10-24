@@ -351,6 +351,7 @@ You can specify any of the following resize modes for your sizes:
 * `100w` - maintain original aspect ratio, resize to 100 pixels wide
 * `80h` - maintain original aspect ratio, resize to 80 pixels high
 * `80l` - maintain original aspect ratio, resize so that longest side is 80 pixels
+* `[100x80]l` - maintain original aspect ratio, resize so that width is no longer than 100 and height no longer than 80
 
 ## Validation rules
 
