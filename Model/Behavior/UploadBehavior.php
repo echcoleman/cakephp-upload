@@ -18,6 +18,7 @@
  * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 App::uses('Folder', 'Utility');
+App::uses('UploadException', 'Upload.Lib/Error/Exception');
 class UploadBehavior extends ModelBehavior {
 
 	public $defaults = array(
@@ -286,7 +287,8 @@ class UploadBehavior extends ModelBehavior {
 			$tmp = $this->runtime[$model->alias][$field]['tmp_name'];
 			$filePath = $path . $model->data[$model->alias][$field];
 			if (!$this->handleUploadedFile($model->alias, $field, $tmp, $filePath)) {
-				$model->invalidate($field, 'moveUploadedFile');
+				$model->invalidate($field, 'Unable to move the uploaded file to '.$filePath);
+				throw new UploadException('Unable to upload file');
 			}
 
 			$this->_createThumbnails($model, $field, $path, $thumbnailPath);
@@ -308,7 +310,7 @@ class UploadBehavior extends ModelBehavior {
 	}
 
 	public function handleUploadedFile($modelAlias, $field, $tmp, $filePath) {
-		return !is_uploaded_file($tmp) || !@move_uploaded_file($tmp, $filePath);
+		return is_uploaded_file($tmp) && @move_uploaded_file($tmp, $filePath);
 	}
 
 	public function unlink($file) {
@@ -703,7 +705,8 @@ class UploadBehavior extends ModelBehavior {
 		if (empty($extensions)) $extensions = $this->settings[$model->alias][$field]['extensions'];
 		$pathInfo = $this->_pathinfo($check[$field]['name']);
 
-		return in_array($pathInfo['extension'], $extensions);
+		$extensions = array_map('strtolower', $extensions);
+		return in_array(strtolower($pathInfo['extension']), $extensions);
 	}
 
 /**
@@ -1231,7 +1234,17 @@ class UploadBehavior extends ModelBehavior {
 					'geometry', 'size', 'thumbnailPath'
 				));
 				$this->_mkPath($thumbnailPathSized);
-				if (!$this->$method($model, $field, $path, $size, $geometry, $thumbnailPathSized)) {
+
+				$valid = false;
+				if (method_exists($model, $method)) {
+					$valid = $model->$method($model, $field, $path, $size, $geometry, $thumbnailPathSized);
+				} elseif (method_exists($this, $method)) {
+					$valid = $this->$method($model, $field, $path, $size, $geometry, $thumbnailPathSized);
+				} else {
+					throw new Exception("Invalid thumbnailMethod %s", $method);
+				}
+
+				if (!$valid) {
 					$model->invalidate($field, 'resizeFail');
 				}
 			}
@@ -1252,7 +1265,18 @@ class UploadBehavior extends ModelBehavior {
 			return $finfo->file($filePath);
 		}
 
-		return mime_content_type($filePath);
+		if (function_exists('exif_imagetype') && function_exists('image_type_to_mime_type')) {
+			$mimetype = image_type_to_mime_type(exif_imagetype($filePath));
+			if ($mimetype !== false) {
+				return $mimetype;
+			}
+		}
+
+		if (function_exists('mime_content_type')) {
+			return mime_content_type($filePath);
+		}
+
+		return 'application/octet-stream';
 	}
 
 	public function _prepareFilesForDeletion(&$model, $field, $data, $options) {
