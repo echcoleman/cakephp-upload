@@ -900,6 +900,7 @@ class UploadBehavior extends ModelBehavior {
  */
 	public function isValidImage(&$model, $check, $requireUpload = true) {
 		$field = array_pop(array_keys($check));
+	}
 
 	public function _resizeImagick(Model $model, $field, $path, $size, $geometry, $thumbnailPath) {
 		$srcFile  = $path . $model->data[$model->alias][$field];
