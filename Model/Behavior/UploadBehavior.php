@@ -900,6 +900,22 @@ class UploadBehavior extends ModelBehavior {
  */
 	public function isValidImage(&$model, $check, $requireUpload = true) {
 		$field = array_pop(array_keys($check));
+		
+		if (!empty($check[$field]['remove'])) {
+			return true;
+		}
+
+		// Allow circumvention of this rule if uploads is not required
+		if (!$requireUpload && $check[$field]['error'] === UPLOAD_ERR_NO_FILE) {
+			return true;
+		}
+
+		// Non-file uploads also mean the it's not an image
+		if (!isset($check[$field]['type']) || !strlen($check[$field]['type'])) {
+			return false;
+		}
+
+		return $this->_isImage($model, $check[$field]['type']);
 	}
 
 	public function _resizeImagick(Model $model, $field, $path, $size, $geometry, $thumbnailPath) {
