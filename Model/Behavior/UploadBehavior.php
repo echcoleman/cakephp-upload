@@ -304,14 +304,6 @@ class UploadBehavior extends ModelBehavior {
  * @throws UploadException
  */
 	public function afterSave(Model $model, $created, $options = array()) {
-		
-		// delete old files first (if available)
-		if (isset($this->__filesToRemove[$model->alias]) && !empty($this->__filesToRemove[$model->alias])) {
-			foreach ($this->__filesToRemove[$model->alias] as $file) {
-				$result[] = $this->unlink($file);
-			}
-		}
-		
 		$temp = array($model->alias => array());
 
 		foreach ($this->settings[$model->alias] as $field => $options) {
@@ -361,7 +353,6 @@ class UploadBehavior extends ModelBehavior {
 			));
 		}
 
-		}
 		if (empty($this->__filesToRemove[$model->alias])) {
 			return true;
 		}
@@ -960,6 +951,7 @@ class UploadBehavior extends ModelBehavior {
 		if (!empty($check[$field]['remove'])) {
 			return true;
 		}
+	}
 
 	protected function _resizeImagick(Model $model, $field, $path, $size, $geometry, $thumbnailPath) {
 		$srcFile = $path . $model->data[$model->alias][$field];
@@ -1157,6 +1149,7 @@ class UploadBehavior extends ModelBehavior {
 					$destH = (int)$geometry;
 				}
 				$resizeMode = false;
+			// extra thumbnail resize options
 			} elseif (preg_match('/^\\[[\\d]+x[\\d]+\\]+l$/', $geometry)) {
 				// calculate shortest side according to aspect ratio for geometry aspect ratio
 				list($destW, $destH) = explode('x', substr($geometry, 1, strlen($geometry)-3));
