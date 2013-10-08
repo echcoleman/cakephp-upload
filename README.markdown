@@ -1,7 +1,8 @@
-# Upload Plugin 2.0 [![Build Status](https://travis-ci.org/josegonzalez/upload.png?branch=master)](https://travis-ci.org/josegonzalez/upload)
+[![Build Status](https://travis-ci.org/josegonzalez/cakephp-upload.png?branch=master)](https://travis-ci.org/josegonzalez/cakephp-upload) [![Coverage Status](https://coveralls.io/repos/josegonzalez/cakephp-upload/badge.png?branch=master)](https://coveralls.io/r/josegonzalez/cakephp-upload?branch=master) [![Total Downloads](https://poser.pugx.org/josegonzalez/cakephp-upload/d/total.png)](https://packagist.org/packages/josegonzalez/cakephp-upload) [![Latest Stable Version](https://poser.pugx.org/josegonzalez/cakephp-upload/v/stable.png)](https://packagist.org/packages/josegonzalez/cakephp-upload)
 
+# Upload Plugin 2.0
 
-The Upload Plugin is an attempt to sanely upload files using techniques garnered packages such as [MeioUpload](http://github.com/jrbasso/MeioUpload) , [UploadPack](http://github.com/szajbus/uploadpack) and [PHP documentation](http://php.net/manual/en/features.file-upload.php).
+The Upload Plugin is an attempt to sanely upload files using techniques garnered packages such as [MeioUpload](http://github.com/jrbasso/MeioUpload) , [UploadPack](http://github.com/szajbus/cakephp-uploadpack) and [PHP documentation](http://php.net/manual/en/features.file-upload.php).
 
 ## Background
 
@@ -16,11 +17,21 @@ Media Plugin is too complicated, and it was a PITA to merge the latest updates i
 
 ## Installation
 
-For CakePHP 1.3 support, please see the [1.3 branch](https://github.com/josegonzalez/upload/tree/1.3).
+_[Using [Composer](http://getcomposer.org/)]_
+
+[View on Packagist](https://packagist.org/packages/josegonzalez/cakephp-upload), and copy the json snippet for the latest version into your project's `composer.json`. Eg, v. 1.0.0 would look like this:
+
+	{
+		"require": {
+			"josegonzalez/cakephp-upload": "1.0.0"
+		}
+	}
+
+Because this plugin has the type `cakephp-plugin` set in it's own `composer.json`, composer knows to install it inside your `/Plugins` directory, rather than in the usual vendors file. It is recommended that you add `/Plugins/Upload` to your .gitignore file. (Why? [read this](http://getcomposer.org/doc/faqs/should-i-commit-the-dependencies-in-my-vendor-directory.md).)
 
 _[Manual]_
 
-* Download this: [http://github.com/josegonzalez/upload/zipball/master](http://github.com/josegonzalez/upload/zipball/master)
+* Download this: [http://github.com/josegonzalez/cakephp-upload/zipball/master](http://github.com/josegonzalez/cakephp-upload/zipball/master)
 * Unzip that download.
 * Copy the resulting folder to `app/Plugin`
 * Rename the folder you just copied to `Upload`
@@ -29,7 +40,7 @@ _[GIT Submodule]_
 
 In your app directory type:
 
-	git submodule add -b master git://github.com/josegonzalez/upload.git Plugin/Upload
+	git submodule add -b master git://github.com/josegonzalez/cakephp-upload.git Plugin/Upload
 	git submodule init
 	git submodule update
 
@@ -37,7 +48,7 @@ _[GIT Clone]_
 
 In your `Plugin` directory type:
 
-	git clone -b master git://github.com/josegonzalez/upload.git Upload
+	git clone -b master git://github.com/josegonzalez/cakephp-upload.git Upload
 
 ### Imagick Support
 
@@ -227,7 +238,7 @@ Once the `attachments` table has been created, we would create the following mod
 				'foreignKey' => 'foreign_key',
 			),
 			'Message' => array(
-				'className' => 'Post',
+				'className' => 'Message',
 				'foreignKey' => 'foreign_key',
 			),
 		);
@@ -525,6 +536,17 @@ Check that a file was uploaded
 		)
 	);
 
+#### isFileUploadOrHasExistingValue
+
+Check that either a file was uploaded, or the existing value in the database is not blank
+
+	public $validate = array(
+		'photo' => array(
+			'rule' => 'isFileUploadOrHasExistingValue',
+			'message' => 'File was missing from submission'
+		)
+	);
+
 #### tempDirExists
 
 Check that the PHP temporary directory is missing
@@ -810,6 +832,15 @@ If the argument `$requireUpload` is passed, we can skip this check when a file i
 
 In the above, the variable `$requireUpload` has a value of false. By default, `requireUpload` is set to true.
 
+## Remove a current file without deleting the entire record
+
+In some cases you might want to remove a photo or uploaded file without having to
+remove the entire record from the Model.  In this case you would use the following code:
+
+    <?php
+    echo $this->Form->create('Model', array('type' => 'file'));
+    echo $this->Form->input('Model.file.remove', array('type' => 'checkbox', 'label' => 'Remove existing file'));
+
 #### isValidImage
 
 Check that the file is of a valid image (based on their mimetype)
@@ -832,7 +863,9 @@ If the argument `$requireUpload` is passed, we can skip this check when a file i
 
 ## License
 
-Copyright (c) 2010-2012 Jose Diaz-Gonzalez
+The MIT License (MIT)
+
+Copyright (c) 2010 Jose Diaz-Gonzalez
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
